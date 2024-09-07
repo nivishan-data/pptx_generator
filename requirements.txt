@@ -1,0 +1,8 @@
+langchain
+langsmith
+python-pptx
+openai==0.28
+streamlit
+langchain_community
+requests
+Pillow
