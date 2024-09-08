@@ -13,27 +13,29 @@ llm = OpenAI(temperature=0.7)
 planning_template = PromptTemplate(
     input_variables=["topic", "num_slides"],
     template="""
-    You are an expert presentation planner. Create a plan for a PowerPoint presentation on the topic "{topic}" with {num_slides} slides. 
-    Provide a brief title and a one-line description of what should be covered on each slide.
+    You are an expert presentation planner. Create a plan for a PowerPoint presentation on the topic "{topic}" with exactly {num_slides} slides. 
+    Provide a distinct title and a one-line description for each slide. 
+    Do NOT use words like "Slide", "Title", or "Header". Only provide the descriptive title related to the content.
+    The content should be concise, clear, and fit within one slide.
     """
 )
 
 content_template = PromptTemplate(
     input_variables=["slide_title", "slide_description"],
     template="""
-    You are an expert content creator. Generate detailed content for a PowerPoint slide titled "{slide_title}".
+    You are an expert content creator. Generate concise content for a PowerPoint slide titled "{slide_title}".
     Slide description: {slide_description}
-    Include headers, bullet points, and bold text for emphasis where necessary. And make sure to create the content which are 
-    summarized and fit to a power point slide. only 75 to 100 characters per slide.
+    The content should be summarized, up to 100 characters, and fit within one PowerPoint slide.
+    Do NOT include "Slide", "Title", or "Header" in the content. Focus on clear points or short paragraphs only.
     """
 )
 
 image_prompt_template = PromptTemplate(
     input_variables=["slide_title", "slide_description"],
     template="""
-    You are an AI model that generates images for presentations. Generate a concise prompt for an AI image generator to create an image for a slide titled "{slide_title}".
-    Slide description: {slide_description}
-    Keep the prompt under 1000 characters. The image should be very simple.
+    You are an AI model that generates images for presentations. Create a concise image prompt for a slide titled "{slide_title}".
+    The description is: {slide_description}. Keep the prompt simple and relevant to the slide content. Avoid using text or words in the image.
+    The prompt should be short and easy to generate, under 1000 characters.
     """
 )
 
@@ -59,15 +61,13 @@ def generate_slide_content(slide_plan):
     return slides_content
 
 def generate_image_prompts(slide_plan):
-    # Generate image prompts for each slide, ensuring they are concise
+    # Generate image prompts for each slide
     image_prompts = []
     for slide in slide_plan:
         prompt = image_prompt_chain.run({
             "slide_title": slide['title'],
             "slide_description": slide['description']
         })
-        if len(prompt) > 1000:
-            prompt = shorten_prompt(prompt)
         image_prompts.append(prompt)
     return image_prompts
 
@@ -99,7 +99,3 @@ def parse_plan_response(response):
                 title, description = parts
                 slides.append({"title": title.strip(), "description": description.strip()})
     return slides
-
-def shorten_prompt(prompt):
-    # Function to shorten the prompt to be within 1000 characters
-    return prompt[:1000]
