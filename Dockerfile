@@ -15,8 +15,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire project to the container
 COPY . .
 
-# Set the OpenAI API Key environment variable (not recommended for production)
-ENV OPENAI_API_KEY=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
 
 # Expose the Streamlit default port
 EXPOSE 8501
